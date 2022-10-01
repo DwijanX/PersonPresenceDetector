@@ -41,7 +41,7 @@ String readServerAnswer(WiFiClient* client)
   }
   return answer.substring(0,len);
 }
-void buttonPressed(WiFiClient* client){
+void interactWithServer(WiFiClient* client){
   turnLedsOff();
   client->println(BUTTONPRESSED);
   while (client->connected() && !client->available()) {delay(1);}
@@ -49,7 +49,6 @@ void buttonPressed(WiFiClient* client){
   Serial.println(ServerAnswer);
   if(ServerAnswer==TURNGREENLEDON)
   {
-    Serial.println("entro");
     turnLedON(GREENLED);
   }
   else if(ServerAnswer==TURNREDLEDON)
@@ -94,7 +93,7 @@ void loop() {
   Serial.println(buttonState);
   if(buttonState==HIGH && ConnectToServer(&client))
   {
-    buttonPressed(&client);
+    interactWithServer(&client);
     delay(5000);
   }
   else

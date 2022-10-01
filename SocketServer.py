@@ -2,7 +2,7 @@
 import socket
 import threading
 import re
-import time
+from time import sleep
 MAX_MESSAGE_LEN=512
 #ClientCommands
 DO_NOTHING="0"
@@ -53,17 +53,26 @@ class SocketServer:
     def handleClient(self,address):
         print("New Connection: "+address[0])
         TypeOfDevice=self.receiveMessage(address)
+        print(TypeOfDevice)
         if(TypeOfDevice==BUTTONCLIENT):
             self.HandleButtonClient(address)
         elif(TypeOfDevice==ULTRASONICCLIENT):
             self.HandleUltrasonicSensorClient(address)
 
     def HandleUltrasonicSensorClient(self,address):
-        if(self.buttonClient.getDistanceRequest()==False):
+        print("ultra")
+        if(self.buttonClient.getDistanceRequest()==False): #debe ser false
             self.sendMessage(DO_NOTHING,address)
             return 0
         self.sendMessage(READ_DISTANCE,address)
-        distanceRetrieved=float(self.receiveMessage(address))
+        sleep(1)
+        ans=self.receiveMessage(address)
+        print("valeer")
+        print(ans)
+        if(ans==''):
+            distanceRetrieved=0
+        else:
+            distanceRetrieved=float(ans)
         self.buttonClient.receiveUltrasonicDistance(distanceRetrieved)
         if(self.buttonClient.getSubjectFound()):
             self.sendMessage(DO_NOTHING,address)
@@ -75,7 +84,6 @@ class SocketServer:
         ButtonMSG=str(ButtonMSG)
         if ButtonMSG==BUTTONPRESSED:
             self.buttonClient.setDistanceRequest(True)
-            self.buttonClient.receiveUltrasonicDistance(50)
             while(self.buttonClient.getDistanceRequest()): pass  #wait UntilUltrasonicAnswers
             
             if(self.buttonClient.getSubjectFound()):
