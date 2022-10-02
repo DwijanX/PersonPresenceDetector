@@ -2,7 +2,7 @@
 #include <WiFi.h>
 #define MAX_MESSAGE_LEN 512
 #define DO_NOTHING "0"
-#define ULTRASONICCLIENTFLAG "U"
+#define ULTRASONICCLIENTFLAG "U" //if the server gets this flag it will use the HandleButtonClient definition
 #define READ_DISTANCE "RD"
 #define TRIGGERPIN 17
 #define ECHOPIN 5
