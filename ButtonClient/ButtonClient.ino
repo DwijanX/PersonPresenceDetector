@@ -1,6 +1,6 @@
 
 #include <WiFi.h>
-#define BUTTONCLIENTFLAG "B"
+#define BUTTONCLIENTFLAG "B" //if the server gets this flag it will use the HandleUltrasonicSensorClient definition
 #define BUTTONPRESSED "BP"
 #define TURNGREENLEDON "greenon"
 #define TURNREDLEDON "redon"
@@ -44,7 +44,7 @@ String readServerAnswer(WiFiClient* client)
 void interactWithServer(WiFiClient* client){
   turnLedsOff();
   client->println(BUTTONPRESSED);
-  while (client->connected() && !client->available()) {delay(1);}
+  while (client->connected() && !client->available()) {delay(1);} //we wait for server answer
   String ServerAnswer=readServerAnswer(client);
   Serial.print("Instruccion del servidor: ");
   Serial.println(ServerAnswer);
@@ -91,8 +91,13 @@ void setup() {
 void loop() {
   WiFiClient client;
   int buttonState = digitalRead(BUTTONPIN);
+<<<<<<< HEAD
   
   if(buttonState==HIGH && ConnectToServer(&client))
+=======
+  Serial.println(buttonState);
+  if(buttonState==HIGH && ConnectToServer(&client)) //when we push our button and server is online
+>>>>>>> de4e02531881cc720ebdb258fe38c66cf0b436f5
   {
     Serial.println("Boton presionado");
     interactWithServer(&client);

@@ -1,6 +1,6 @@
 
-import socket
-import threading
+import socket # library used for server purposes
+import threading #library used for multiple users
 import re
 from time import sleep
 MAX_MESSAGE_LEN=512
@@ -16,8 +16,8 @@ ULTRASONICCLIENT="U"
 BUTTONPRESSED="BP"
 MINDISTANCETODETECTPERSON=0
 MAXDISTANCETODETECTPERSON=50
-class ButtonClient:
-    def __init__(self,minDistance=0,maxDistance=100):
+class ButtonClient: #class used for getting distance and returning parameters based on that
+    def __init__(self,minDistance=0,maxDistance=100): #if distance doesnt have a value is automatically put on 0 and 100
         self.DistanceRequest=False
         self.subjectFound=False
         self.minDistance=minDistance
@@ -36,37 +36,37 @@ class ButtonClient:
         self.DistanceRequest=False
 
     
-class SocketServer:
+class SocketServer: #class we use for starting the server
     def __init__(self,PORT,ip):
         self.PORT=PORT
         self.Ip=ip
         self.ConnectionsbyADDR={}
         self.clientThreads={}
-        self.buttonClient=ButtonClient(MINDISTANCETODETECTPERSON,MAXDISTANCETODETECTPERSON)
+        self.buttonClient=ButtonClient(MINDISTANCETODETECTPERSON,MAXDISTANCETODETECTPERSON) # we set our parameters for our person detection
         self.socketServer=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-        self.socketServer.bind((ip,PORT))
+        self.socketServer.bind((ip,PORT)) #binding our ip and port initialized in main()
     def start(self):
         print("Server Ip "+self.Ip)
-        self.socketServer.listen()
+        self.socketServer.listen() #we start hearing client connection
         while True:
             Connection,addr=self.socketServer.accept()
             self.clientThreads[addr]=threading.Thread(target=self.handleClient, args=(addr,))
-            self.ConnectionsbyADDR[addr]=Connection
-            self.clientThreads[addr].start()
+            self.ConnectionsbyADDR[addr]=Connection #we save our client connection using variable address
+            self.clientThreads[addr].start() #we initialize a thread with each new client
 
     def handleClient(self,address):
         print("New Connection: "+address[0])
         TypeOfDevice=self.receiveMessage(address)
         
-        if(TypeOfDevice==BUTTONCLIENT):
+        if(TypeOfDevice==BUTTONCLIENT): #depending of our type of device we get our client type
             print("Button Client Connected")
             self.HandleButtonClient(address)
         elif(TypeOfDevice==ULTRASONICCLIENT):
             print("Ultra Sonic Connected")
             self.HandleUltrasonicSensorClient(address)
 
-    def HandleUltrasonicSensorClient(self,address):
-        if(self.buttonClient.getDistanceRequest()==False): #debe ser false
+    def HandleUltrasonicSensorClient(self,address): #for our ultrasonicsensor client we get the distance and beep based on the value
+        if(self.buttonClient.getDistanceRequest()==False):
             self.sendMessage(DO_NOTHING,address)
             return 0
         self.sendMessage(READ_DISTANCE,address)
@@ -76,7 +76,7 @@ class SocketServer:
             distanceRetrieved=0
         else:
             distanceRetrieved=float(clientAnswer)
-        print("Distnace Retrieved from ultrasonic client: ")
+        print("Distance Retrieved from ultrasonic client: ")
         print(distanceRetrieved)
         self.buttonClient.receiveUltrasonicDistance(distanceRetrieved)
         if(self.buttonClient.getSubjectFound()):
@@ -84,7 +84,7 @@ class SocketServer:
         else:
             self.sendMessage(BEEP,address)
             
-    def HandleButtonClient(self,address):
+    def HandleButtonClient(self,address): #for our button client we turn a led on green or red based on the distance value returned in our sensor client
         ButtonMSG=self.receiveMessage(address)
         ButtonMSG=str(ButtonMSG)
         if ButtonMSG==BUTTONPRESSED:
@@ -102,12 +102,12 @@ class SocketServer:
         self.ConnectionsbyADDR[address].send(Message.encode("utf-8"))
     def receiveMessage(self,address):
         answer=self.ConnectionsbyADDR[address].recv(MAX_MESSAGE_LEN).decode("utf-8")
-        return re.sub(r'\r\n', '', answer)
+        return re.sub(r'\r\n', '', answer) #we return an string without carriage characters
 
 def main():
-    PORT=21000
-    ip=socket.gethostbyname(socket.gethostname())
-    Socket=SocketServer(PORT,ip) 
+    PORT=21000 #port chosen for our server
+    ip=socket.gethostbyname(socket.gethostname()) #we get our server IP
+    Socket=SocketServer(PORT,ip) # we bind that IP to our server class
     Socket.start()
 
 main()
