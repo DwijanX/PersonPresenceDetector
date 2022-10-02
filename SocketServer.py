@@ -14,10 +14,14 @@ TURNREDLEDON="redon"
 BUTTONCLIENT="B"
 ULTRASONICCLIENT="U"
 BUTTONPRESSED="BP"
+MINDISTANCETODETECTPERSON=0
+MAXDISTANCETODETECTPERSON=50
 class ButtonClient:
-    def __init__(self):
+    def __init__(self,minDistance=0,maxDistance=100):
         self.DistanceRequest=False
         self.subjectFound=False
+        self.minDistance=minDistance
+        self.maxDistance=maxDistance
     def setDistanceRequest(self,newValue:bool):
         self.DistanceRequest=newValue
     def getDistanceRequest(self):
@@ -25,7 +29,7 @@ class ButtonClient:
     def getSubjectFound(self):
         return self.subjectFound
     def receiveUltrasonicDistance(self,distanceMeasured):
-        if(distanceMeasured>0 and distanceMeasured<100):
+        if(distanceMeasured>=self.minDistance and distanceMeasured<=self.maxDistance):
             self.subjectFound=True
         else:
             self.subjectFound=False
@@ -38,7 +42,7 @@ class SocketServer:
         self.Ip=ip
         self.ConnectionsbyADDR={}
         self.clientThreads={}
-        self.buttonClient=ButtonClient()
+        self.buttonClient=ButtonClient(MINDISTANCETODETECTPERSON,MAXDISTANCETODETECTPERSON)
         self.socketServer=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
         self.socketServer.bind((ip,PORT))
     def start(self):
@@ -53,22 +57,21 @@ class SocketServer:
     def handleClient(self,address):
         print("New Connection: "+address[0])
         TypeOfDevice=self.receiveMessage(address)
-        print(TypeOfDevice)
+        
         if(TypeOfDevice==BUTTONCLIENT):
+            print("Button Client Connected")
             self.HandleButtonClient(address)
         elif(TypeOfDevice==ULTRASONICCLIENT):
+            print("Ultra Sonic Connected")
             self.HandleUltrasonicSensorClient(address)
 
     def HandleUltrasonicSensorClient(self,address):
-        print("ultra")
         if(self.buttonClient.getDistanceRequest()==False): #debe ser false
             self.sendMessage(DO_NOTHING,address)
             return 0
         self.sendMessage(READ_DISTANCE,address)
         sleep(1)
         ans=self.receiveMessage(address)
-        print("valeer")
-        print(ans)
         if(ans==''):
             distanceRetrieved=0
         else:
