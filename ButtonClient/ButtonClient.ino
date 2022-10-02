@@ -46,6 +46,7 @@ void interactWithServer(WiFiClient* client){
   client->println(BUTTONPRESSED);
   while (client->connected() && !client->available()) {delay(1);}
   String ServerAnswer=readServerAnswer(client);
+  Serial.print("Instruccion del servidor: ");
   Serial.println(ServerAnswer);
   if(ServerAnswer==TURNGREENLEDON)
   {
@@ -55,7 +56,7 @@ void interactWithServer(WiFiClient* client){
   {
     turnLedON(REDLED);
   }
-  Serial.println("\nDisconecting");
+  Serial.println("Disconecting");
   client->stop();
 }
 bool ConnectToServer(WiFiClient* client)
@@ -90,14 +91,16 @@ void setup() {
 void loop() {
   WiFiClient client;
   int buttonState = digitalRead(BUTTONPIN);
-  Serial.println(buttonState);
+  
   if(buttonState==HIGH && ConnectToServer(&client))
   {
+    Serial.println("Boton presionado");
     interactWithServer(&client);
     delay(5000);
   }
   else
   {
+    Serial.println("Boton no presionado");
     client.println(DO_NOTHING);
   }
   delay(100);

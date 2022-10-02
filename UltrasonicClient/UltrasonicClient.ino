@@ -16,8 +16,7 @@ const char* serverIp="192.168.0.79";
 
 void beepSpeaker()
 {
-  Serial.println("entrebeep");
-  
+  Serial.println("Comando de beep");
   for(int i=0;i<500;i++)
   {
     digitalWrite(SPEAKERPIN, HIGH);
@@ -79,17 +78,18 @@ int waitServerInstructions(WiFiClient* client)
 int interactWithServer(WiFiClient* client){
   while (client->connected() && !client->available()) {delay(1);}
   String ServerAnswer=readServerAnswer(client);
-  Serial.println(ServerAnswer);
+  if (ServerAnswer=="0")
+    Serial.println("No se solicito distancia");
   int Distance=0;
   if(ServerAnswer==READ_DISTANCE)
   {
     Distance=readUltrasonicDistance(TRIGGERPIN,ECHOPIN);
-    Serial.print("Distance: ");
+    Serial.print("Distance readed: ");
     Serial.println(Distance);
     client->println(Distance);
     waitServerInstructions(client);
   }
-  Serial.println("\nDisconecting");
+  Serial.println("Disconecting");
   client->stop();
   return 0;
 }

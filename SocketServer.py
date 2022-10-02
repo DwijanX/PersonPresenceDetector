@@ -71,11 +71,13 @@ class SocketServer:
             return 0
         self.sendMessage(READ_DISTANCE,address)
         sleep(1)
-        ans=self.receiveMessage(address)
-        if(ans==''):
+        clientAnswer=self.receiveMessage(address)
+        if(clientAnswer==''):
             distanceRetrieved=0
         else:
-            distanceRetrieved=float(ans)
+            distanceRetrieved=float(clientAnswer)
+        print("Distnace Retrieved from ultrasonic client: ")
+        print(distanceRetrieved)
         self.buttonClient.receiveUltrasonicDistance(distanceRetrieved)
         if(self.buttonClient.getSubjectFound()):
             self.sendMessage(DO_NOTHING,address)
