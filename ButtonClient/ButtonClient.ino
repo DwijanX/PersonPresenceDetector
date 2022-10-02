@@ -10,9 +10,9 @@
 #define GREENLED 13
 #define BUTTONPIN 25
 
-const char* ssid="POCO X4 Pro 5G";
-const char* pass="testwemos";
-const int port=21000;
+const char* ssid="POCO X4 Pro 5G"; //set local network
+const char* pass="testwemos"; //local network password
+const int port=21000; 
 const char* serverIp="192.168.0.79";
 
 void turnLedON(int PIN){
